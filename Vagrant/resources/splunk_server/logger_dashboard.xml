@@ -47,27 +47,9 @@
   </row>
   <row>
     <panel>
-      <title>Top Suricata Network Alerts</title>
-      <table>
-        <search>
-          <query>index=suricata | stats values(src_ip) count by alert.signature, alert.signature_id</query>
-          <earliest>-24h@h</earliest>
-          <latest>now</latest>
-          <sampleRatio>1</sampleRatio>
-        </search>
-        <option name="count">20</option>
-        <option name="dataOverlayMode">none</option>
-        <option name="drilldown">none</option>
-        <option name="percentagesRow">false</option>
-        <option name="refresh.display">progressbar</option>
-        <option name="rowNumbers">false</option>
-        <option name="totalsRow">false</option>
-        <option name="wrap">true</option>
-      </table>
-    </panel>
-    <panel>
-      <title>Zeek Network Traffic by Type</title>
+      <title>Zeek Network Traffic and ZeekAgent Events by Type</title>
       <chart>
+	<option name="height">500</option>
         <search>
           <query>index=zeek | stats count by _time, tag::eventtype | timechart span=1h count by tag::eventtype</query>
           <earliest>-24h@h</earliest>
@@ -81,10 +63,38 @@
   </row>
   <row>
     <panel>
-      <title>Windows Events by Host</title>
+      <title>Zeek Agent Events by Syscalls</title>
       <chart>
         <search>
-          <query>| tstats count where index=wineventlog by host, _time span=1h prestats=t | timechart span=1h count by host</query>
+          <query> index=zeek | stats count by _time, syscall | timechart span=1h count by syscall </query>
+          <earliest>-24h@h</earliest>
+          <latest>now</latest>
+        </search>
+	<option name="charting.chart">column</option>
+        <option name="charting.chart.stackMode">stacked</option>
+        <option name="charting.drilldown">none</option>
+      </chart>
+    </panel>
+    <panel>
+      <title>Zeek Agent Events by Syscalls</title>
+      <chart>
+        <search>
+          <query> index=zeek | chart count by syscall </query>
+          <earliest>-24h@h</earliest>
+          <latest>now</latest>
+        </search>
+	<option name="charting.chart">pie</option>
+        <option name="charting.chart.showPercent">true</option>
+      </chart>
+    </panel>
+  </row>
+
+    <row>
+    <panel>
+      <title>Zeek Agent Events by Host</title>
+      <chart>
+        <search>
+          <query> index=zeek | stats count by _time, hostname | timechart span=1h count by hostname</query>
           <earliest>-24h@h</earliest>
           <latest>now</latest>
         </search>
@@ -93,74 +103,44 @@
         <option name="refresh.display">progressbar</option>
       </chart>
     </panel>
-    <panel>
-      <title>Sysmon Events by Host</title>
+    </row>
+
+
+    <row>
+      <panel>
       <chart>
+	<title>Zeek Agent Memory Usage </title>
         <search>
-          <query>| tstats count where index=sysmon by host, _time span=1h prestats=t | timechart span=1h count by host</query>
-          <earliest>-24h@h</earliest>
+          <query>index=linux sourcetype="ps" host="host1" COMMAND IN (*zeek*) |
+          eval MEM_Z=(mem_used/1024/1024) | timechart avg(MEM_Z) AS MEM_Z_B
+          span=5sec | appendcols [search index=linux sourcetype="ps"
+          host="host1" COMMAND IN (*audit*) | eval MEM_A=(mem_used/1024/1024) |
+          timechart avg(MEM_A) AS MEM_A_B span=5sec ] | eval
+          comb=MEM_A_B+MEM_Z_B | timechart avg(comb) AS "Memory Used
+          (MB)"</query>
+          <earliest>-2h@h</earliest>
           <latest>now</latest>
         </search>
-        <option name="charting.chart">line</option>
+        <option name="charting.chart">area</option>
         <option name="charting.drilldown">none</option>
       </chart>
-    </panel>
-    <panel>
-      <title>osquery Events by Host</title>
-      <chart>
+      </panel>
+
+      <panel>
+	<chart>
+	  <title>Zeek Agent CPU Load </title>
         <search>
-          <query>| tstats count where index=osquery by host, _time span=1h prestats=t | timechart span=1h count by host</query>
-          <earliest>-24h@h</earliest>
+          <query>index=linux sourcetype="ps" host="host1" COMMAND IN (*zeek*) | timechart avg(cpu_load_percent) AS CPU_ZA span=5sec | appendcols  [search index=linux sourcetype="ps" host="host1" COMMAND IN (*audit*) | timechart avg(cpu_load_percent) AS CPU_AD span=5sec] | eval comb=CPU_AD+CPU_ZA | timechart avg(comb) AS "CPU Load (%)"</query>
+          <earliest>-2h@h</earliest>
           <latest>now</latest>
         </search>
-        <option name="charting.chart">line</option>
+        <option name="charting.chart">area</option>
         <option name="charting.drilldown">none</option>
-        <option name="refresh.display">progressbar</option>
       </chart>
-    </panel>
-  </row>
-  <row>
-    <panel>
-      <title>Jack Crook's Hunting for Beacons Query</title>
-      <table>
-        <title>http://findingbad.blogspot.com/2020/05/hunting-for-beacons-part-2.html</title>
-        <search>
-          <query>index=zeek (dest_port=443 OR dest_port=80)  
-| rename orig_bytes as bytes_out resp_bytes as bytes_in 
-| stats count(bytes_out) as "beacon_count" values(bytes_in) as bytes_in by src_ip,dest_ip,bytes_out |eventstats sum(beacon_count) as total_count dc(bytes_out) as unique_count by src_ip,dest_ip 
-| eval beacon_avg=('beacon_count' / 'total_count') 
-| stats values(beacon_count) as beacon_count values(unique_count) as unique_count values(beacon_avg) as beacon_avg values(total_count) as total_count values(bytes_in) as bytes_in by src_ip,dest_ip,bytes_out 
-| head 100
-| eval incount=mvcount(bytes_in) 
-| eventstats avg(beacon_count) as overall_average 
-| eval beacon_percentage=('beacon_count' / 'overall_average') 
-| sort - beacon_percentage</query>
-          <earliest>-24h@h</earliest>
-          <latest>now</latest>
-        </search>
-        <option name="count">20</option>
-        <option name="drilldown">none</option>
-        <option name="refresh.display">progressbar</option>
-      </table>
-    </panel>
-  </row>
-  <row>
-    <panel>
-      <title>Powershell Event Preview</title>
-      <table>
-        <search>
-          <query>index=powershell | table _time, host, _raw, sourcetype</query>
-          <earliest>-24h@h</earliest>
-          <latest>now</latest>
-        </search>
-        <option name="count">1</option>
-        <option name="drilldown">none</option>
-        <option name="rowNumbers">false</option>
-        <option name="wrap">true</option>
-      </table>
-    </panel>
-  </row>
-  <row>
+      </panel>
+    </row>
+
+    <row>
     <panel>
       <title>License Usage</title>
       <chart>
