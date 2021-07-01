@@ -198,7 +198,7 @@ install_zeek() {
   tar xzf zeek-3.1.3.tar.gz
   cd zeek-3.1.3
   ./configure --prefix=/opt/zeek/
-  make -j4
+  make -j2
   sudo make install
   # Update APT repositories
   apt-get -qq -ym update
