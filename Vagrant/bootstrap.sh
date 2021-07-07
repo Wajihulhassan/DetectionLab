@@ -35,18 +35,9 @@ apt_install_prerequisites() {
   apt-get -qq install -y apt-fast
   echo "[$(date +%H:%M:%S)]: Running apt-fast install..."
   apt-fast -qq install -y jq whois git unzip htop yq python3-pip cmake make gcc g++ flex bison libpcap-dev libssl-dev python-dev swig zlib1g-dev emacs
-}
-
-modify_motd() {
-  echo "[$(date +%H:%M:%S)]: Updating the MOTD..."
-  # Force color terminal
+  # colorful terminal
   sed -i 's/#force_color_prompt=yes/force_color_prompt=yes/g' /root/.bashrc
   sed -i 's/#force_color_prompt=yes/force_color_prompt=yes/g' /home/vagrant/.bashrc
-  # Remove some stock Ubuntu MOTD content
-  chmod -x /etc/update-motd.d/10-help-text
-  # Copy the DetectionLab MOTD
-  cp /vagrant/resources/logger/20-detectionlab /etc/update-motd.d/
-  chmod +x /etc/update-motd.d/20-detectionlab
 }
 
 test_prerequisites() {
@@ -192,7 +183,6 @@ install_zeek() {
 
 
   ## custom download ######################
-
   cd ~
   wget https://download.zeek.org/zeek-3.1.3.tar.gz
   tar xzf zeek-3.1.3.tar.gz
@@ -305,20 +295,16 @@ install_zeek_agent_framework() {
   chown -R vagrant:vagrant projects
 }
 
-
 postinstall_tasks() {
   # Include Splunk and Zeek in the PATH
   echo export PATH="$PATH:/opt/zeek/bin" >>~/.bashrc
   echo "export SPLUNK_HOME=/opt/splunk" >>~/.bashrc
   # Include Zeekpath
   echo export ZEEKPATH="/home/vagrant/projects/zeek-agent-framework/:$(zeek-config --zeekpath)" >>~/.bashrc
-  # Ping DetectionLab server for usage statistics
-  curl -s -A "DetectionLab-logger" "https:/ping.detectionlab.network/logger" || echo "Unable to connect to ping.detectionlab.network"
 }
 
 main() {
   apt_install_prerequisites
-  modify_motd
   test_prerequisites
   fix_eth1_static_ip
   install_splunk

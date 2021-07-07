@@ -32,18 +32,11 @@ apt_install_prerequisites() {
   echo "[$(date +%H:%M:%S)]: Changing default compilers..."
   sudo update-alternatives --set cc /usr/bin/clang
   sudo update-alternatives --set c++ /usr/bin/clang++
-}
-
-modify_motd() {
-  echo "[$(date +%H:%M:%S)]: Updating the MOTD..."
-  # Force color terminal
+  
+  # colorful terminal
   sed -i 's/#force_color_prompt=yes/force_color_prompt=yes/g' /root/.bashrc
   sed -i 's/#force_color_prompt=yes/force_color_prompt=yes/g' /home/vagrant/.bashrc
-  # Remove some stock Ubuntu MOTD content
-  chmod -x /etc/update-motd.d/10-help-text
-  # Copy the DetectionLab MOTD
-  cp /vagrant/resources/logger/20-detectionlab /etc/update-motd.d/
-  chmod +x /etc/update-motd.d/20-detectionlab
+
 }
 
 test_prerequisites() {
@@ -176,11 +169,6 @@ install_splunk_forwarder() {
     /opt/splunkforwarder/bin/splunk restart
 }
 
-postinstall_tasks() {
-  # Ping DetectionLab server for usage statistics
-  curl -s -A "DetectionLab-logger" "https:/ping.detectionlab.network/logger" || echo "Unable to connect to ping.detectionlab.network"
-}
-
 main() {
   apt_install_prerequisites
   modify_motd
@@ -189,7 +177,6 @@ main() {
   install_config_auditd
   install_zeek_agent
   install_splunk_forwarder
-  postinstall_tasks
 }
 
 main
