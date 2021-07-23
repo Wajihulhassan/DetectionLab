@@ -1,0 +1,7 @@
+#! /bin/bash
+START=$SECONDS
+vagrant up machine$1
+vagrant ssh -c "echo export PATH='$PATH:/home/vagrant/projects/zeek-agent/build' >>~/.bashrc" machine$1
+TIME_TAKEN=$(($SECONDS-$START))
+echo "Total Time Taken: "$TIME_TAKEN" s"
+bash

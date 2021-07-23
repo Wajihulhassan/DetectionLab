@@ -1,0 +1,9 @@
+#! /bin/bash
+
+start=$SECONDS
+echo "Please enter the number of VMs you would like to spawn:"
+read number
+for (( i=1; i<=$number; i++ ))
+do
+	gnome-terminal -- ./helloWorld $i
+done

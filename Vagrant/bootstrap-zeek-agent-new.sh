@@ -120,11 +120,27 @@ EOF
 
     mkdir -p /home/vagrant/projects/
     cd /home/vagrant/projects/
+
+    # git clone https://github.com/zeek/zeek-agent.git --recursive
+    # cd zeek-agent/
+    # mkdir ./build/
+    # cd  build
+    # cmake -DCMAKE_BUILD_TYPE:STRING=RelWithDebInfo -DZEEK_AGENT_ENABLE_INSTALL:BOOL=ON -DZEEK_AGENT_ENABLE_TESTS:BOOL=ON -DZEEK_AGENT_ZEEK_COMPATIBILITY:STRING="3.1" /home/vagrant/projects/zeek-agent/
+    # cd ../../
+    # wget https://github.com/Wajihulhassan/zeek-agent/releases/download/refs%2Fheads%2Fworkflow/zeek31_zeek-agent-0.1.1-Linux.zip
+    # unzip zeek31_zeek-agent-0.1.1-Linux.zip
+    # cd zeek-agent-0.1.1-Linux/bin
+    # cp zeek-agent /home/vagrant/projects/zeek-agent/build
+    # cd ../../
+    # rm -r zeek-agent-0.1.1-Linux
+    # cd /home/vagrant/projects/zeek-agent/build
+
     mkdir -p zeek-agent
     cd zeek-agent
     wget https://github.com/hamzashahzad1/zeek-agent/releases/download/refs%2Fheads%2Fmaster/zeek31_zeek-agent.zip
     unzip zeek31_zeek-agent.zip
     cd build
+
     nohup ./zeek-agent &
     bg_pid=$!
     echo "${bg_pid}" > zeek-agent.pid
