@@ -1,0 +1,11 @@
+#! /bin/bash
+START=$SECONDS
+#SUM=0
+#for (( i=0; i<10000000; i++ ))
+#do
+#	SUM=$(($SUM + $i))
+#done
+vagrant up logger
+END=$(($SECONDS - $START))
+echo "Time taken by logger: "$END "seconds" >> timelogs
+vagrant ssh -c "echo export PATH='$PATH:/opt/zeek/bin' >>~/.bashrc" logger

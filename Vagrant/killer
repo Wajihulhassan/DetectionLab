@@ -1,0 +1,6 @@
+#! /bin/bash
+screen -S logger -X kill
+for (( i=$1; i<=$2; i++ ))
+do
+screen -S screen_$i -X kill
+done

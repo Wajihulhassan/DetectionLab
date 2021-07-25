@@ -1,0 +1,9 @@
+#! /bin/bash
+screen -d -m -S logger
+screen -S logger -X stuff "./loggerScript \n"
+for (( i=$1; i<=$2; i++ ))
+do
+	screen -d -m -S screen_$i
+	CMD="./singleVM $i"
+	screen -S screen_$i -X stuff "$CMD \n"
+done

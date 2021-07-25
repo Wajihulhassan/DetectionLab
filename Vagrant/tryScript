@@ -1,0 +1,6 @@
+#! /bin/bash
+STATUS=( $(vagrant status host15) )
+while [ "${STATUS[4]}" == "poweroff" ]
+do
+vagrant up host15
+done

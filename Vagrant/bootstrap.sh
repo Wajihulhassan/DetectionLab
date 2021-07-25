@@ -303,11 +303,12 @@ postinstall_tasks() {
   echo export ZEEKPATH="/home/vagrant/projects/zeek-agent-framework/:$(zeek-config --zeekpath)" >>~/.bashrc
 }
 
-main() {LATEST_SPLUNK
+main() {
+ # LATEST_SPLUNK
   apt_install_prerequisites
   test_prerequisitesL
   fix_eth1_static_ip
-  install_splunk
+ # install_splunk
   install_zeek_agent_framework
   install_zeek
   postinstall_tasks

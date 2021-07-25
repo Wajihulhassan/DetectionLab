@@ -1,0 +1,14 @@
+#! /bin/bash
+screen -d -m -S logger
+screen -S logger -X stuff
+"START=$SECONDS;SUM=0;for (( i=0; i<10000000; i++ )) do SUM=$(($SUM + $i)); done; end=$(($SECONDS - $START)); echo 'Time for logger: '$end 'seconds' >> timelogs \n"
+
+printf "How many Screens Do you want?"
+read NUMBER
+for (( i=1; i<=$NUMBER; i++ ))
+do
+	screen -d -m -S screen_$i
+	CMD="./singleVM $i"
+	screen -S screen_$i -X stuff "$CMD \n"
+	screen -S screen_$i -X stuff "screen -S screen_$i -X kill \n"
+done
