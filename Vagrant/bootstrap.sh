@@ -308,7 +308,7 @@ main() {
   apt_install_prerequisites
   test_prerequisitesL
   fix_eth1_static_ip
- # install_splunk
+  install_splunk
   install_zeek_agent_framework
   install_zeek
   postinstall_tasks

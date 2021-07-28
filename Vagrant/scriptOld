@@ -1,6 +1,0 @@
-#! /bin/bash
-START=$SECONDS
-vagrant up host1
-TIME_TAKEN=$(($SECONDS - $START))
-printf "\nTime Taken: "
-echo $TIME_TAKEN" s"

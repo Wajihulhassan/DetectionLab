@@ -1,0 +1,18 @@
+#! /bin/bash
+printf "Press 1 to start Zeek-Agents\n"
+printf "Press 2 to stop Zeek-Agents\n"
+read CHOICE
+if [[ "$CHOICE" -eq "1" ]]
+then
+for (( i=$1; i<=$2; i++ ))
+do
+	#vagrant ssh -c "echo export PATH='$PATH:/home/vagrant/projects/zeek-agent/build' >>~/.bashrc" host$i
+	vagrant ssh -c "screen -d -m -S zeekAgent1; screen -S zeekAgent -X stuff 'sudo zeek-agent \n'" host$i
+done
+else
+for (( i=$1; i<=$2; i++ ))
+do
+        vagrant ssh -c "screen -S zeekAgent -X kill \n" host$i
+done
+fi
+

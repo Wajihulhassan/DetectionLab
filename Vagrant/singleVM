@@ -1,19 +1,20 @@
 #! /bin/bash
-#SUM=0
 START=$SECONDS
-#for (( j=0; j<1000000; j++ ))
-#do
-#	SUM=$(($SUM + $j))
-#	echo $SUM
-#done
-
 vagrant up host$1
 STATUS=( $(vagrant status host$1) )
-while [ "${STATUS[4]}" == "poweroff" ]
+for (( i=0; i<100; i++ ))
 do
-vagrant up host$1
+	if [ "${STATUS[4]}" == "poweroff" ]; then
+		vagrant up host$1
+	else
+		break
+	fi
 done
+#while [ "${STATUS[4]}" == "poweroff" ]
+#do
+#vagrant up host$1
+#done
 
 END=$(($SECONDS - $START))
 echo "Time Taken by host$1: "$END" seconds" >> timelogs
-vagrant ssh -c "echo export PATH='$PATH:/home/vagrant/projects/zeek-agent/build' >>~/.bashrc" host$1
+#vagrant ssh -c "echo export PATH='$PATH:/home/vagrant/projects/zeek-agent/build' >>~/.bashrc" host$1

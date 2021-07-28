@@ -120,23 +120,35 @@ EOF
 
     mkdir -p /home/vagrant/projects/
     cd /home/vagrant/projects/
-    git clone https://github.com/zeek/zeek-agent.git --recursive
-    cd zeek-agent/
-    mkdir ./build/
-    cd  build
-    cmake -DCMAKE_BUILD_TYPE:STRING=RelWithDebInfo -DZEEK_AGENT_ENABLE_INSTALL:BOOL=ON -DZEEK_AGENT_ENABLE_TESTS:BOOL=ON -DZEEK_AGENT_ZEEK_COMPATIBILITY:STRING="3.1" /home/vagrant/projects/zeek-agent/
-    cmake --build . -j2
-    # mkdir -p zeek-agent
-    # cd zeek-agent
-    # wget https://github.com/hamzashahzad1/zeek-agent/releases/download/refs%2Fheads%2Fmaster/zeek31_zeek-agent.zip
-    # unzip zeek31_zeek-agent.zip
+
+    # git clone https://github.com/zeek/zeek-agent.git --recursive
+    # cd zeek-agent/
+    # mkdir ./build/
+    # cd  build
+    # cmake -DCMAKE_BUILD_TYPE:STRING=RelWithDebInfo -DZEEK_AGENT_ENABLE_INSTALL:BOOL=ON -DZEEK_AGENT_ENABLE_TESTS:BOOL=ON -DZEEK_AGENT_ZEEK_COMPATIBILITY:STRING="3.1" /home/vagrant/projects/zeek-agent/
+    # cd ../../
+    # wget https://github.com/Wajihulhassan/zeek-agent/releases/download/refs%2Fheads%2Fworkflow/zeek31_zeek-agent-0.1.1-Linux.zip
+    # unzip zeek31_zeek-agent-0.1.1-Linux.zip
+    # cd zeek-agent-0.1.1-Linux/bin
+    # cp zeek-agent /home/vagrant/projects/zeek-agent/build
+    # cd ../../
+    # rm -r zeek-agent-0.1.1-Linux
+    # cd /home/vagrant/projects/zeek-agent/build
+
+    mkdir -p zeek-agent
+    cd zeek-agent
+    wget https://github.com/hamzashahzad1/zeek-agent/releases/download/refs%2Fheads%2Fmaster/zeek31_zeek-agent.zip
+    unzip zeek31_zeek-agent.zip
+    cd build
+
     nohup ./zeek-agent &
     bg_pid=$!
     echo "${bg_pid}" > zeek-agent.pid
 
     cd /home/vagrant/
     chown -R vagrant:vagrant ./projects
-    echo export PATH="$PATH:/home/vagrant/projects/zeek-agent/build" >>~/.bashrc
+    echo "export PATH='$PATH:/home/vagrant/projects/zeek-agent/build'" >>~/.bashrc
+	source ~/.bashrc
 }
 
 install_config_auditd() {
@@ -158,7 +170,9 @@ EOF
     sudo systemctl restart auditd
     sudo auditctl -e1 -b 1024
 }
-
+apt_install_prerequisites
+  modify_motd
+  test_prerequisites
 install_splunk_forwarder() {
     dpkg -i /vagrant/resources/splunk_forwarder/splunkforwarder-8.0.6-152fb4b2bb96-linux-2.6-amd64.deb
     /opt/splunkforwarder/bin/splunk start --accept-license --answer-yes --no-prompt --seed-passwd changeme
@@ -177,12 +191,11 @@ install_splunk_forwarder() {
 
 main() {
   apt_install_prerequisites
-  modify_motd
   test_prerequisites
   fix_eth1_static_ip
   install_config_auditd
   install_zeek_agent
-  install_splunk_forwarder
+  # install_splunk_forwarder
 }
 
 main
