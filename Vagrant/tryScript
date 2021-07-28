@@ -1,6 +1,15 @@
 #! /bin/bash
-STATUS=( $(vagrant status host15) )
-while [ "${STATUS[4]}" == "poweroff" ]
-do
-vagrant up host15
-done
+STATUS=( $(vagrant status host14) )
+if [[ "${STATUS[4]}" == "poweroff" ]] || [[ "${STATUS[4]}" == "not" && "${STATUS[5]}" == "created" ]]
+then
+echo "failed"
+elif [ "${STATUS[4]}" == "running" ]; then
+echo "passed"
+fi
+
+STR=$(vagrant ssh -c "ls projects/zeek-agent" host14)
+if [[ "$STR" == *"build"* ]]; then
+echo "zeek-agent is present"
+else
+echo "zeek-agent is not present"
+fi

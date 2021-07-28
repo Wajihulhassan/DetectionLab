@@ -11,16 +11,19 @@ else
 	if [ "$2" == "up" ]
 	then
 		STATUS=( $(vagrant status host$1) )
-		for (( i=0; i<100; i++ ))
+		for (( i=0; i<1000; i++ ))
 		do
-			if [ "${STATUS[4]}" == "poweroff" ]; then
+			STATUS=( $(vagrant status host$1) )
+			if [[ "${STATUS[4]}" == "poweroff" ]] || [[ "${STATUS[4]}" == "not" && "${STATUS[5]}" == "created" ]]; then
 				vagrant up host$1
+			elif [ "${STATUS[4]}" == "running" ]; then
+				
 			else
 				break
 			fi
 		done
 		STATUS=( $(vagrant status host$1) )
-		if [ "${STATUS[4]}" == "poweroff" ] || [ [ "${STATUS[4]}" == "not" ] && [ "${STATUS[5]}" == "created" ] ]; then
+		if [ [ "${STATUS[4]}" == "poweroff" ] || [ [ "${STATUS[4]}" == "not" ] && [ "${STATUS[5]}" == "created" ] ] ]; then
 			DATETIME=`date +"%D %T"`
 			echo "$DATETIME 	failed to create host$i properly"
 		fi
