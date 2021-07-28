@@ -13,3 +13,5 @@ echo "zeek-agent is present"
 else
 echo "zeek-agent is not present"
 fi
+sleep 10
+echo "program ending"

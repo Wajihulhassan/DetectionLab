@@ -10,23 +10,22 @@ else
 	vagrant $2 host$1
 	if [ "$2" == "up" ]
 	then
-		STATUS=( $(vagrant status host$1) )
+		BUILT="false"
 		for (( i=0; i<1000; i++ ))
 		do
 			STATUS=( $(vagrant status host$1) )
 			if [[ "${STATUS[4]}" == "poweroff" ]] || [[ "${STATUS[4]}" == "not" && "${STATUS[5]}" == "created" ]]; then
 				vagrant up host$1
 			elif [ "${STATUS[4]}" == "running" ]; then
-				
-			else
-				break
+				STR=$(vagrant ssh -c "ls projects/zeek-agent" host$1)
+				if [[ "$STR" == *"build"* ]]; then
+					BUILT="true"
+					break
+				else
+					vagrant up host$1
+				fi
 			fi
 		done
-		STATUS=( $(vagrant status host$1) )
-		if [ [ "${STATUS[4]}" == "poweroff" ] || [ [ "${STATUS[4]}" == "not" ] && [ "${STATUS[5]}" == "created" ] ] ]; then
-			DATETIME=`date +"%D %T"`
-			echo "$DATETIME 	failed to create host$i properly"
-		fi
 		END=$(($SECONDS - $START))
 		echo "Time Taken by host$1: "$END" seconds" >> timelogs
 		vagrant ssh -c "echo export PATH='$PATH:/home/vagrant/projects/zeek-agent/build' >>~/.bashrc" host$1
