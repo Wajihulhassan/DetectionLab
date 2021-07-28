@@ -1,20 +1,37 @@
 #! /bin/bash
 START=$SECONDS
-vagrant up host$1
-STATUS=( $(vagrant status host$1) )
-for (( i=0; i<100; i++ ))
-do
-	if [ "${STATUS[4]}" == "poweroff" ]; then
-		vagrant up host$1
-	else
-		break
+if [ "$2" == "destroy" ]; then
+	vagrant destroy -f host$1
+elif [ "$2" == "startZeekAgent" ]; then
+	vagrant ssh -c "screen -d -m -S zeekAgent; screen -S zeekAgent -X stuff 'sudo zeek-agent \n'" host$1
+elif [ "$2" == "stopZeekAgent" ]; then
+	vagrant ssh -c "screen -XS zeekAgent quit" host$1
+else
+	vagrant $2 host$1
+	if [ "$2" == "up" ]
+	then
+		STATUS=( $(vagrant status host$1) )
+		for (( i=0; i<100; i++ ))
+		do
+			if [ "${STATUS[4]}" == "poweroff" ]; then
+				vagrant up host$1
+			else
+				break
+			fi
+		done
+		STATUS=( $(vagrant status host$1) )
+		if [ "${STATUS[4]}" == "poweroff" ] || [ [ "${STATUS[4]}" == "not" ] && [ "${STATUS[5]}" == "created" ] ]; then
+			DATETIME=`date +"%D %T"`
+			echo "$DATETIME 	failed to create host$i properly"
+		fi
+		END=$(($SECONDS - $START))
+		echo "Time Taken by host$1: "$END" seconds" >> timelogs
+		vagrant ssh -c "echo export PATH='$PATH:/home/vagrant/projects/zeek-agent/build' >>~/.bashrc" host$1
+
 	fi
-done
+fi
+#screen -S screen_$1 -X kill
 #while [ "${STATUS[4]}" == "poweroff" ]
 #do
 #vagrant up host$1
 #done
-
-END=$(($SECONDS - $START))
-echo "Time Taken by host$1: "$END" seconds" >> timelogs
-#vagrant ssh -c "echo export PATH='$PATH:/home/vagrant/projects/zeek-agent/build' >>~/.bashrc" host$1

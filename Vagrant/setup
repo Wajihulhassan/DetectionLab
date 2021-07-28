@@ -1,9 +1,35 @@
 #! /bin/bash
-screen -d -m -S logger
-screen -S logger -X stuff "./loggerScript \n"
-for (( i=$1; i<=$2; i++ ))
+printf "Press 1 to create new hosts\n"
+printf "Press 2 to restart hosts\n"
+printf "Press 3 to shut down hosts\n"
+printf "Press 4 to destroy hosts\n"
+printf "Press 5 to run zeek-agent in hosts\n"
+printf "Press 6 to stop zeek-agent in hosts\n"
+
+read OPTION
+COMMAND=""
+if [ "$OPTION" == "1" ]; then
+	COMMAND="up"
+elif [ "$OPTION" == "2" ]; then
+	COMMAND="reload"
+elif [ "$OPTION" == "3" ]; then
+	COMMAND="halt"
+elif [ "$OPTION" == "4" ]; then
+	COMMAND="destroy"
+elif [ "$OPTION" == "5" ]; then
+        COMMAND="startZeekAgent"
+elif [ "$OPTION" == "6" ]; then
+        COMMAND="stopZeekAgent"
+fi
+printf "Enter the starting host number?"
+read FIRST
+printf "Enter the ending host number?"
+read LAST
+#screen -d -m -S logger
+#screen -S logger -X stuff "./loggerScript \n"
+for (( i=$FIRST; i<=$LAST; i++ ))
 do
 	screen -d -m -S screen_$i
-	CMD="./singleVM $i"
+	CMD="./singleVM $i $COMMAND"
 	screen -S screen_$i -X stuff "$CMD \n"
 done
