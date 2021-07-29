@@ -4,6 +4,12 @@ if [ "$2" == "destroy" ]; then
 	vagrant destroy -f host$1
 elif [ "$2" == "startZeekAgent" ]; then
 	vagrant ssh -c "screen -d -m -S zeekAgent; screen -S zeekAgent -X stuff 'sudo zeek-agent \n'" host$1
+	STATUS=$(vagrant ssh -c "screen -ls" host$1 | grep -c "Dead")
+	while [ $STATUS -eq 1 ]; do
+		screen -wipe
+		vagrant ssh -c "screen -d -m -S zeekAgent; screen -S zeekAgent -X stuff 'sudo zeek-agent \n'" host$1
+		STATUS=$(vagrant ssh -c "screen -ls" host$1 | grep -c "Dead")
+	done
 elif [ "$2" == "stopZeekAgent" ]; then
 	vagrant ssh -c "screen -XS zeekAgent quit" host$1
 else

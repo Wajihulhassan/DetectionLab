@@ -7,19 +7,33 @@ tput setaf 2;echo "$OUT"
 UP=`echo "$OUT" | grep host | awk -v num=$1 'BEGIN {str=""} {if(NR<num+1) str=$1 FS str;} END {print str}'`
 DOWN=`echo "$OUT" | grep host | awk -v num=$1 'BEGIN {str=""} {if(NR>num) str=$1 FS str;} END {print str}'`
 tput setaf 1;echo "setting up $1 machines"
+echo $DOWN | awk 'BEGIN {RS=" ";} {print $0;}' | xargs -P5 -I {} vagrant halt {}
 echo $UP | awk 'BEGIN {RS=" ";} {print $0;}' | xargs -P5 -I {} vagrant up {}
-#echo $DOWN | awk 'BEGIN {RS=" ";} {print $0;}' | xargs -P5 -I {} vagrant halt {}
 tput setaf 1;echo "checking zeek-agent-framework"
 #vagrant up logger
-#vagrant ssh -c "cd /opt/zeek/bin; sudo ./zeekctl restart" logger
+vagrant ssh -c "cd /opt/zeek/bin; sudo ./zeekctl restart" logger
 IFS=' ' read -ra array <<< "$UP"
 for x in "${array[@]}"
 do
     tput setaf 2;echo "launching zeek agent on $x"
-    vagrant ssh -c "sudo kill $(pgrep zeek-agent)" $x
-    vagrant ssh -c "nohup sudo zeek-agent </dev/null &>/dev/null &" $x
-    #vagrant ssh -c "screen -wipe; screen -ls | grep zeekAgent | cut -d. -f1 | awk '{print $1}' | xargs kill" $x
-    #vagrant ssh -c "screen -d -m -S zeekAgent; screen -S zeekAgent -X stuff 'sudo zeek-agent \n'" $x
+    #vagrant ssh -c "sudo kill $(pgrep zeek-agent)" $x
+    #vagrant ssh -c "nohup sudo zeek-agent &" $x
+    #vagrant ssh -c "screen -wipe; screen -ls | grep zeekAgent | cut -d. -f1 | awk '{print $1}' | xargs sudo kill" $x
+    vagrant ssh -c "pkill screen" $x
+    vagrant ssh -c "screen -dmS zeekAgent; screen -S zeekAgent -X stuff 'cd /home/vagrant/projects/zeek-agent/build;sudo ./zeek-agent \n'" $x
+    TMP=$(vagrant ssh -c "screen -ls | grep -c dead" $x 2>&1)
+    TMP=$(echo "$TMP" | awk '{if($1==1) print "error"}')
+    for ((i=0;i<3;i++))
+    do
+        if [[ $TMP = "error" ]]
+        then
+	    echo "re-attempting to start zeek-agent on $x"
+            vagrant ssh -c "screen -wipe" $x
+            vagrant ssh -c "screen -dmS zeekAgent; screen -S zeekAgent -X stuff 'cd /home/vagrant/projects/zeek-agent/build;sudo ./zeek-agent \n'" $x
+            TMP=$(vagrant ssh -c "screen -ls | grep -c dead" $x 2>&1)
+            TMP=$(echo "$TMP" | awk '{if($1==1) print "error"}')
+        fi
+    done
 done
 sleep 10
 touch data.txt
