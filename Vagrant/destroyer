@@ -1,5 +1,14 @@
 #! /bin/bash
+#for (( i=$1; i<=$2; i++ ))
+#do
+#vagrant destroy -f host$i
+#done
 for (( i=$1; i<=$2; i++ ))
 do
-vagrant destroy -f host$i
+	STR=$(vagrant ssh -c "screen -ls" host$i)
+	echo "host$i	$STR"
+	if [[ "$STR" == *"Dead"* ]]
+	then
+		echo "host$i screen is dead"
+	fi
 done

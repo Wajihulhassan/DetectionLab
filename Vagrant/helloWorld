@@ -1,7 +1,10 @@
 #! /bin/bash
-START=$SECONDS
-vagrant up machine$1
-vagrant ssh -c "echo export PATH='$PATH:/home/vagrant/projects/zeek-agent/build' >>~/.bashrc" machine$1
-TIME_TAKEN=$(($SECONDS-$START))
-echo "Total Time Taken: "$TIME_TAKEN" s"
-bash
+for (( i=$1; i<=$2; i++ ))
+do
+	STR=$(vagrant ssh -c "ls projects/zeek-agent" host$i)
+	if [[ "$STR" == *"build"* ]]; then
+		echo "host$i was correctly configured"
+	else
+		echo "host $i was not correctly configured"
+	fi
+done
