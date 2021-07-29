@@ -14,21 +14,21 @@ elif [ "$2" == "stopZeekAgent" ]; then
 	vagrant ssh -c "screen -XS zeekAgent quit" host$1
 else
 	vagrant $2 host$1
-	if [ "$2" == "up" ]
+	if [[ "$2" == "up" ]] || [[ "$2" == "reload" ]]
 	then
 		BUILT="false"
 		for (( i=0; i<1000; i++ ))
 		do
 			STATUS=( $(vagrant status host$1) )
 			if [[ "${STATUS[4]}" == "poweroff" ]] || [[ "${STATUS[4]}" == "not" && "${STATUS[5]}" == "created" ]]; then
-				vagrant up host$1
+				vagrant $2 host$1
 			elif [ "${STATUS[4]}" == "running" ]; then
 				STR=$(vagrant ssh -c "ls projects/zeek-agent" host$1)
 				if [[ "$STR" == *"build"* ]]; then
 					BUILT="true"
 					break
 				else
-					vagrant up host$1
+					vagrant $2 host$1
 				fi
 			fi
 		done
@@ -38,8 +38,4 @@ else
 
 	fi
 fi
-#screen -S screen_$1 -X kill
-#while [ "${STATUS[4]}" == "poweroff" ]
-#do
-#vagrant up host$1
-#done
+screen -S screen_$1 -X kill
