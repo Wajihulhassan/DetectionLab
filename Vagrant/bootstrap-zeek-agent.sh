@@ -137,7 +137,8 @@ EOF
 
     mkdir -p zeek-agent
     cd zeek-agent
-    wget https://github.com/hamzashahzad1/zeek-agent/releases/download/refs%2Fheads%2Fmaster/zeek31_zeek-agent.zip
+    # wget https://github.com/hamzashahzad1/zeek-agent/releases/download/refs%2Fheads%2Fmaster/zeek31_zeek-agent.zip
+    wget https://github.com/Wajihulhassan/zeek-agent/releases/download/refs%2Fheads%2Flearning/zeek31_zeek-agent.zip
     unzip zeek31_zeek-agent.zip
     cd build
 
