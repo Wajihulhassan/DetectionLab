@@ -107,7 +107,6 @@ install_zeek_agent() {
 {
   "server_address": "192.168.38.105",
   "server_port": 9999,
-
   "log_folder": "/var/log/zeek",
   "max_queued_row_count": 5000,
   "osquery_extensions_socket": "/var/osquery/osquery.em",
@@ -120,23 +119,18 @@ EOF
 
     mkdir -p /home/vagrant/projects/
     cd /home/vagrant/projects/
-    # git clone https://github.com/zeek/zeek-agent.git --recursive
-    git clone https://github.com/Wajihulhassan/zeek-agent --recursive
-    # cd zeek-agent/
-    # mkdir ./build/
-    # cd  build
-    # cmake -DCMAKE_BUILD_TYPE:STRING=RelWithDebInfo -DZEEK_AGENT_ENABLE_INSTALL:BOOL=ON -DZEEK_AGENT_ENABLE_TESTS:BOOL=ON -DZEEK_AGENT_ZEEK_COMPATIBILITY:STRING="3.1" /home/vagrant/projects/zeek-agent/
-    # cmake --build . -j2
-    # # mkdir -p zeek-agent
-    # # cd zeek-agent
-    # # wget https://github.com/hamzashahzad1/zeek-agent/releases/download/refs%2Fheads%2Fmaster/zeek31_zeek-agent.zip
-    # # unzip zeek31_zeek-agent.zip
-    # nohup ./zeek-agent &
+    git clone https://github.com/hamzashahzad1/zeek-agent.git --recursive
+    cd zeek-agent/
+    mkdir ./build/
+    cd  build
+    cmake -DCMAKE_BUILD_TYPE:STRING=RelWithDebInfo -DZEEK_AGENT_ENABLE_INSTALL:BOOL=ON -DZEEK_AGENT_ENABLE_TESTS:BOOL=ON -DZEEK_AGENT_ZEEK_COMPATIBILITY:STRING="3.1" /home/vagrant/projects/zeek-agent/
+    cmake --build . -j2
+    nohup ./zeek-agent &
     bg_pid=$!
-    # echo "${bg_pid}" > zeek-agent.pid
+    echo "${bg_pid}" > zeek-agent.pid
 
-    # cd /home/vagrant/
-    # chown -R vagrant:vagrant ./projects
+    cd /home/vagrant/
+    chown -R vagrant:vagrant ./projects
     # echo export PATH="$PATH:/home/vagrant/projects/zeek-agent/build" >>~/.bashrc
 }
 
