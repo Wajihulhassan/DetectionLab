@@ -8,6 +8,7 @@ fi
 sed -i 's/nameserver 127.0.0.53/nameserver 8.8.8.8/g' /etc/resolv.conf && chattr +i /etc/resolv.conf
 
 FIXED_IP=$1
+OPTION=$2
 
 export DEBIAN_FRONTEND=noninteractive
 echo "apt-fast apt-fast/maxdownloads string 10" | debconf-set-selections
@@ -119,19 +120,35 @@ EOF
 
     mkdir -p /home/vagrant/projects/
     cd /home/vagrant/projects/
-    git clone https://github.com/hamzashahzad1/zeek-agent.git --recursive
-    cd zeek-agent/
-    mkdir ./build/
-    cd  build
-    cmake -DCMAKE_BUILD_TYPE:STRING=RelWithDebInfo -DZEEK_AGENT_ENABLE_INSTALL:BOOL=ON -DZEEK_AGENT_ENABLE_TESTS:BOOL=ON -DZEEK_AGENT_ZEEK_COMPATIBILITY:STRING="3.1" /home/vagrant/projects/zeek-agent/
-    cmake --build . -j2
+    if [[ "$OPTION" == "0" ]];
+    then
+      git clone https://github.com/zeek/zeek-agent.git --recursive
+      cd zeek-agent/
+      mkdir ./build/
+      cd  build
+      cmake -DCMAKE_BUILD_TYPE:STRING=RelWithDebInfo -DZEEK_AGENT_ENABLE_INSTALL:BOOL=ON -DZEEK_AGENT_ENABLE_TESTS:BOOL=ON -DZEEK_AGENT_ZEEK_COMPATIBILITY:STRING="3.1" /home/vagrant/projects/zeek-agent/
+      cmake --build . -j2
+    elif [[ "$OPTION" == "1" ]];
+    then
+      mkdir -p zeek-agent
+      cd zeek-agent
+      wget https://github.com/hamzashahzad1/zeek-agent/releases/download/refs%2Fheads%2Fmaster/zeek31_zeek-agent.zip
+      unzip zeek31_zeek-agent.zip
+      cd build
+    else
+      mkdir -p zeek-agent
+      cd zeek-agent
+      touch error.log
+      echo "incorrect argument provided to the script. Please provide either 0 or 1" >> error.log
+      exit 1
+    fi
     nohup ./zeek-agent &
     bg_pid=$!
     echo "${bg_pid}" > zeek-agent.pid
 
     cd /home/vagrant/
     chown -R vagrant:vagrant ./projects
-    # echo export PATH="$PATH:/home/vagrant/projects/zeek-agent/build" >>~/.bashrc
+    echo export PATH="$PATH:/home/vagrant/projects/zeek-agent/build" >>~/.bashrc
 }
 
 install_config_auditd() {
@@ -172,7 +189,6 @@ install_splunk_forwarder() {
 
 main() {
   apt_install_prerequisites
-  modify_motd
   test_prerequisites
   fix_eth1_static_ip
   install_config_auditd
