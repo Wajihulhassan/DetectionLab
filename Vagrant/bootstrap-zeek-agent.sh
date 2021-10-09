@@ -122,7 +122,7 @@ EOF
     cd /home/vagrant/projects/
     if [[ "$OPTION" == "0" ]];
     then
-      git clone https://github.com/zeek/zeek-agent.git --recursive
+      git clone https://github.com/Wajihulhassan/zeek-agent.git --recursive
       cd zeek-agent/
       mkdir ./build/
       cd  build
@@ -132,7 +132,7 @@ EOF
     then
       mkdir -p zeek-agent
       cd zeek-agent
-      wget https://github.com/hamzashahzad1/zeek-agent/releases/download/refs%2Fheads%2Fmaster/zeek31_zeek-agent.zip
+      wget https://github.com/Wajihulhassan/zeek-agent/releases/download/refs%2Fheads%2Fhamza-development/zeek31_zeek-agent.zip
       unzip zeek31_zeek-agent.zip
       cd build
     else
