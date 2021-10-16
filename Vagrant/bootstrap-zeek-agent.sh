@@ -126,6 +126,8 @@ EOF
     then
       git clone https://github.com/Wajihulhassan/zeek-agent.git --recursive
       cd zeek-agent/
+      git fetch origin hamza-development
+      git checkout -f hamza-development
       mkdir ./build/
       cd  build
       cmake -DCMAKE_BUILD_TYPE:STRING=RelWithDebInfo -DZEEK_AGENT_ENABLE_INSTALL:BOOL=ON -DZEEK_AGENT_ENABLE_TESTS:BOOL=ON -DZEEK_AGENT_ZEEK_COMPATIBILITY:STRING="3.1" /home/vagrant/projects/zeek-agent/
