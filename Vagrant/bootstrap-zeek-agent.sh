@@ -111,7 +111,9 @@ install_zeek_agent() {
   "log_folder": "/var/log/zeek",
   "max_queued_row_count": 5000,
   "osquery_extensions_socket": "/var/osquery/osquery.em",
-  "group_list": []
+  "group_list": [],
+  "excluded_syscall_list": [],
+  "store_local_logs": "false"
 }
 EOF
 
@@ -163,6 +165,10 @@ install_config_auditd() {
 -a exit,always -F arch=b64 -S bind
 -a exit,always -F arch=b64 -S open
 -a exit,always -F arch=b64 -S openat
+-a exit,always -F arch=b64 -S close
+-a exit,always -F arch=b64 -S write
+-a exit,always -F arch=b64 -S exit
+-a exit,always -F arch=b64 -S exit_group
 EOF
     sudo systemctl enable --now auditd
     sudo sed -i 's/no/yes/g' /etc/audisp/plugins.d/af_unix.conf
