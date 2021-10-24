@@ -113,7 +113,7 @@ install_zeek_agent() {
   "osquery_extensions_socket": "/var/osquery/osquery.em",
   "group_list": [],
   "excluded_syscall_list": [],
-  "store_local_logs": "false"
+  "store_local_logs": "no"
 }
 EOF
 
