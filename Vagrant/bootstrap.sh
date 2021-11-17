@@ -259,6 +259,12 @@ install_zeek() {
   crudini --set $NODECFG worker-eth1 interface eth1
   crudini --set $NODECFG worker-eth1 lb_method pf_ring
   crudini --set $NODECFG worker-eth1 lb_procs 1
+  
+  crudini --set $NODECFG worker-eth2 type worker
+  crudini --set $NODECFG worker-eth2 host localhost
+  crudini --set $NODECFG worker-eth2 interface eth2
+  crudini --set $NODECFG worker-eth2 lb_method pf_ring
+  crudini --set $NODECFG worker-eth2 lb_procs 1
 
   # Setup Zeek to run at boot
   cp /vagrant/resources/zeek/zeek.service /lib/systemd/system/zeek.service
