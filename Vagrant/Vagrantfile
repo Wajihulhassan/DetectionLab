@@ -3,22 +3,23 @@ Vagrant.configure("2") do |config|
   config.vm.define "logger" do |cfg|
     cfg.vm.box = "bento/ubuntu-20.04"
     cfg.vm.hostname = "logger"
-    cfg.vm.provision :shell, path: "bootstrap.sh"
+    cfg.vm.provision :shell, path: "bootstrap.sh" 
     cfg.vm.network :private_network, ip: "192.168.38.105", gateway: "192.168.38.1", dns: "8.8.8.8"
-
+    cfg.vm.network :public_network, type: "dhcp"
+    
     cfg.vm.provider "vmware_desktop" do |v, override|
       v.vmx["displayname"] = "logger"
       v.memory = 8048
       v.cpus = 4
     end
-
+    
     cfg.vm.provider "virtualbox" do |vb, override|
       vb.name = "logger"
-      vb.customize ["modifyvm", :id, "--memory", 8048]
-      vb.customize ["modifyvm", :id, "--cpus", 4]
+      vb.customize ["modifyvm", :id, "--memory", 2048]
+      vb.customize ["modifyvm", :id, "--cpus", 2]
       vb.customize ["modifyvm", :id, "--vram", "32"]
-      vb.customize ["modifyvm", :id, "--nicpromisc2", "allow-all"]
       vb.customize ["modifyvm", :id, "--clipboard", "bidirectional"]
+      vb.customize ["modifyvm", :id, "--nicpromisc3", "allow-all"]
       vb.customize ["modifyvm", :id, "--natdnshostresolver1", "on"]
       vb.customize ["setextradata", "global", "GUI/SuppressMessages", "all" ]
     end
@@ -30,21 +31,22 @@ Vagrant.configure("2") do |config|
     cfg.vm.hostname = "host2"
     cfg.vm.provision :shell, path: "bootstrap-zeek-agent.sh", args: "192.168.38.104 0"
     cfg.vm.network :private_network, ip: "192.168.38.104", gateway: "192.168.38.1", dns: "8.8.8.8"
-
+    cfg.vm.network :public_network, type: "dhcp"
+    
     cfg.vm.provider "vmware_desktop" do |v, override|
       v.vmx["displayname"] = "host2"
-      v.memory = 4048
-      v.cpus = 2
+      v.memory = 8048
+      v.cpus = 4
     end
 
     cfg.vm.provider "virtualbox" do |vb, override|
       vb.name = "host2"
-      vb.customize ["modifyvm", :id, "--memory", 4048]
+      vb.customize ["modifyvm", :id, "--memory", 2048]
       vb.customize ["modifyvm", :id, "--cpus", 2]
       vb.customize ["modifyvm", :id, "--vram", "32"]
-      vb.customize ["modifyvm", :id, "--nicpromisc2", "allow-all"]
-      vb.customize ["modifyvm", :id, "--clipboard", "bidirectional"]
+      vb.customize ["modifyvm", :id, "--nicpromisc3", "allow-all"]
       vb.customize ["modifyvm", :id, "--natdnshostresolver1", "on"]
+      vb.customize ["modifyvm", :id, "--clipboard", "bidirectional"]
       vb.customize ["setextradata", "global", "GUI/SuppressMessages", "all" ]
     end
   end
@@ -52,23 +54,24 @@ Vagrant.configure("2") do |config|
   config.vm.define "host3" do |cfg|
     cfg.vm.box = "bento/ubuntu-20.04"
     cfg.vm.hostname = "host3"
-    cfg.vm.provision :shell, path: "bootstrap-zeek-agent.sh", args: "192.168.38.103 1"
+    cfg.vm.provision :shell, path: "bootstrap-zeek-agent.sh", args: "192.168.38.103 0"
     cfg.vm.network :private_network, ip: "192.168.38.103", gateway: "192.168.38.1", dns: "8.8.8.8"
-
+    cfg.vm.network :public_network, type: "dhcp"
+    
     cfg.vm.provider "vmware_desktop" do |v, override|
       v.vmx["displayname"] = "host3"
-      v.memory = 4048
-      v.cpus = 2
+      v.memory = 8048
+      v.cpus = 4
     end
-
+    
     cfg.vm.provider "virtualbox" do |vb, override|
       vb.name = "host3"
-      vb.customize ["modifyvm", :id, "--memory", 4048]
+      vb.customize ["modifyvm", :id, "--memory", 2048]
       vb.customize ["modifyvm", :id, "--cpus", 2]
       vb.customize ["modifyvm", :id, "--vram", "32"]
-      vb.customize ["modifyvm", :id, "--nicpromisc2", "allow-all"]
-      vb.customize ["modifyvm", :id, "--clipboard", "bidirectional"]
+      vb.customize ["modifyvm", :id, "--nicpromisc3", "allow-all"]
       vb.customize ["modifyvm", :id, "--natdnshostresolver1", "on"]
+      vb.customize ["modifyvm", :id, "--clipboard", "bidirectional"]
       vb.customize ["setextradata", "global", "GUI/SuppressMessages", "all" ]
     end
   end
