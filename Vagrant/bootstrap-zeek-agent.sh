@@ -130,6 +130,9 @@ EOF
       cd  build
       cmake -DCMAKE_BUILD_TYPE:STRING=RelWithDebInfo -DZEEK_AGENT_ENABLE_INSTALL:BOOL=ON -DZEEK_AGENT_ENABLE_TESTS:BOOL=ON -DZEEK_AGENT_ZEEK_COMPATIBILITY:STRING="3.1" /home/vagrant/projects/zeek-agent/
       cmake --build . -j2
+      cmake --build . --target zeek_agent_tests -- -v
+      cmake --build . --target doxygen -- -v
+      cmake --build . --target install -- -v
     elif [[ "$OPTION" == "1" ]];
     then
       mkdir -p zeek-agent
