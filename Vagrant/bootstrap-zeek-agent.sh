@@ -126,17 +126,18 @@ EOF
     then
       git clone https://github.com/Wajihulhassan/zeek-agent.git --recursive
       cd zeek-agent/
-      git fetch origin hamza-development
-      git checkout -f hamza-development
       mkdir ./build/
       cd  build
       cmake -DCMAKE_BUILD_TYPE:STRING=RelWithDebInfo -DZEEK_AGENT_ENABLE_INSTALL:BOOL=ON -DZEEK_AGENT_ENABLE_TESTS:BOOL=ON -DZEEK_AGENT_ZEEK_COMPATIBILITY:STRING="3.1" /home/vagrant/projects/zeek-agent/
       cmake --build . -j2
+      cmake --build . --target zeek_agent_tests -- -v
+      cmake --build . --target doxygen -- -v
+      cmake --build . --target install -- -v
     elif [[ "$OPTION" == "1" ]];
     then
       mkdir -p zeek-agent
       cd zeek-agent
-      wget https://github.com/Wajihulhassan/zeek-agent/releases/download/refs%2Fheads%2Fhamza-development/zeek31_zeek-agent.zip
+      wget https://github.com/Wajihulhassan/zeek-agent/releases/download/refs%2Fheads%2Fmaster/zeek31_zeek-agent.zip
       unzip zeek31_zeek-agent.zip
       cd build
     else

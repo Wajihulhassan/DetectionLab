@@ -29,7 +29,8 @@ Vagrant.configure("2") do |config|
   config.vm.define "host2" do |cfg|
     cfg.vm.box = "bento/ubuntu-20.04"
     cfg.vm.hostname = "host2"
-    cfg.vm.provision :shell, path: "bootstrap-zeek-agent.sh", args: "192.168.38.104 0"
+    # Two args are being passed here. The first arg is the ip address. The second arg is a 0/1 flag. If the flag is set to 0, detection lab will locally build zeek agent on the host from scratch. If the arg is set to 1, the Zeek Agent binary will be downloaded from the github releases. 
+    cfg.vm.provision :shell, path: "bootstrap-zeek-agent.sh", args: "192.168.38.104 1"
     cfg.vm.network :private_network, ip: "192.168.38.104", gateway: "192.168.38.1", dns: "8.8.8.8"
     cfg.vm.network :public_network, type: "dhcp"
     
@@ -54,7 +55,7 @@ Vagrant.configure("2") do |config|
   config.vm.define "host3" do |cfg|
     cfg.vm.box = "bento/ubuntu-20.04"
     cfg.vm.hostname = "host3"
-    cfg.vm.provision :shell, path: "bootstrap-zeek-agent.sh", args: "192.168.38.103 0"
+    cfg.vm.provision :shell, path: "bootstrap-zeek-agent.sh", args: "192.168.38.103 1"
     cfg.vm.network :private_network, ip: "192.168.38.103", gateway: "192.168.38.1", dns: "8.8.8.8"
     cfg.vm.network :public_network, type: "dhcp"
     
