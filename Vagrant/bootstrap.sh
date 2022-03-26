@@ -171,8 +171,8 @@ display.page.home.dashboardId = /servicesNS/nobody/search/data/ui/views/logger_d
     fi
     cp /vagrant/resources/splunk_server/logger_dashboard.xml /opt/splunk/etc/apps/search/local/data/ui/views || echo "Unable to find dashboard"
     # Reboot Splunk to make changes take effect
-    /opt/splunk/bin/splunk restart
-    /opt/splunk/bin/splunk enable boot-start
+    # /opt/splunk/bin/splunk restart
+    # /opt/splunk/bin/splunk enable boot-start
   fi
 }
 
@@ -188,7 +188,7 @@ install_zeek() {
   tar xzf zeek-3.1.3.tar.gz
   cd zeek-3.1.3
   ./configure --prefix=/opt/zeek/
-  make -j2
+  make -j3
   sudo make install
   # Update APT repositories
   apt-get -qq -ym update
@@ -222,7 +222,7 @@ install_zeek() {
   @load protocols/smtp/software
   @load protocols/ssh/software
   @load protocols/http/software
-  @load tuning/json-logs
+  @load policy/tuning/json-logs.zeek
   @load policy/integration/collective-intel
   @load policy/frameworks/intel/do_notice
   @load frameworks/intel/seen
@@ -271,17 +271,17 @@ install_zeek() {
   systemctl enable zeek
   systemctl start zeek
 
-  # # Configure the Splunk inputs
-  mkdir -p /opt/splunk/etc/apps/Splunk_TA_bro/local && touch /opt/splunk/etc/apps/Splunk_TA_bro/local/inputs.conf
-  crudini --set /opt/splunk/etc/apps/Splunk_TA_bro/local/inputs.conf monitor:///opt/zeek/spool/manager index zeek
-  crudini --set /opt/splunk/etc/apps/Splunk_TA_bro/local/inputs.conf monitor:///opt/zeek/spool/manager sourcetype bro:json
-  crudini --set /opt/splunk/etc/apps/Splunk_TA_bro/local/inputs.conf monitor:///opt/zeek/spool/manager whitelist '.*\.log$'
-  crudini --set /opt/splunk/etc/apps/Splunk_TA_bro/local/inputs.conf monitor:///opt/zeek/spool/manager blacklist '.*(communication|stderr)\.log$'
-  crudini --set /opt/splunk/etc/apps/Splunk_TA_bro/local/inputs.conf monitor:///opt/zeek/spool/manager disabled 0
+  # # # Configure the Splunk inputs
+  # mkdir -p /opt/splunk/etc/apps/Splunk_TA_bro/local && touch /opt/splunk/etc/apps/Splunk_TA_bro/local/inputs.conf
+  # crudini --set /opt/splunk/etc/apps/Splunk_TA_bro/local/inputs.conf monitor:///opt/zeek/spool/manager index zeek
+  # crudini --set /opt/splunk/etc/apps/Splunk_TA_bro/local/inputs.conf monitor:///opt/zeek/spool/manager sourcetype bro:json
+  # crudini --set /opt/splunk/etc/apps/Splunk_TA_bro/local/inputs.conf monitor:///opt/zeek/spool/manager whitelist '.*\.log$'
+  # crudini --set /opt/splunk/etc/apps/Splunk_TA_bro/local/inputs.conf monitor:///opt/zeek/spool/manager blacklist '.*(communication|stderr)\.log$'
+  # crudini --set /opt/splunk/etc/apps/Splunk_TA_bro/local/inputs.conf monitor:///opt/zeek/spool/manager disabled 0
 
-  # Ensure permissions are correct and restart splunk
-  chown -R splunk:splunk /opt/splunk/etc/apps/Splunk_TA_bro
-  /opt/splunk/bin/splunk restart
+  # # Ensure permissions are correct and restart splunk
+  # chown -R splunk:splunk /opt/splunk/etc/apps/Splunk_TA_bro
+  # /opt/splunk/bin/splunk restart
 
   # Verify that Zeek is running
   if ! pgrep -f zeek >/dev/null; then
@@ -309,13 +309,62 @@ postinstall_tasks() {
   echo export ZEEKPATH="/home/vagrant/projects/zeek-agent-framework/:$(zeek-config --zeekpath)" >>~/.bashrc
 }
 
+install_elk() {
+    echo "[$(date +%H:%M:%S)]: Installing ElasticSearch and Kibana..."
+    wget -qO - https://artifacts.elastic.co/GPG-KEY-elasticsearch | sudo apt-key add - &>/dev/null
+    sudo apt-get install -y apt-transport-https
+    echo "deb https://artifacts.elastic.co/packages/7.x/apt stable main" | sudo tee -a /etc/apt/sources.list.d/elastic-7.x.list
+    sudo apt-get update && sudo apt-get install -y elasticsearch
+    echo '
+network.host: 0.0.0.0
+http.port: 9200
+discovery.type: single-node
+  ' >>/etc/elasticsearch/elasticsearch.yml
+    sudo service elasticsearch start
+    sudo apt-get update && sudo apt-get install -y kibana
+    echo '
+server.port: 5601
+server.host: "0.0.0.0"
+  ' >>/etc/kibana/kibana.yml
+    sudo service kibana start
+    sudo apt-get install filebeat
+    sudo systemctl enable filebeat
+    sudo systemctl stop filebeat
+    sudo filebeat modules enable zeek
+    rm /etc/filebeat/modules.d/zeek.yml
+    echo '
+- module: zeek
+  capture_loss:
+    enabled: true
+    var.paths: ["/opt/zeek/logs/current/capture_loss.log"]
+  connection:
+    enabled: true
+    var.paths: ["/opt/zeek/logs/current/conn.log"]
+  dns:
+    enabled: true
+    var.paths: ["/opt/zeek/logs/current/dns.log"]
+  files:
+    enabled: true
+    var.paths: ["/opt/zeek/logs/current/files.log"]
+  ftp:
+    enabled: true
+    var.paths: ["/opt/zeek/logs/current/ftp.log"]
+  http:
+    enabled: true
+    var.paths: ["/opt/zeek/logs/current/http.log"]
+  ' >>/etc/filebeat/modules.d/zeek.yml
+    sudo filebeat setup
+    sudo service filebeat start
+}
+
 main() {
   apt_install_prerequisites
   test_prerequisites
   fix_eth1_static_ip
-  install_splunk
+  #install_splunk
   install_zeek_agent_framework
   install_zeek
+  install_elk
   postinstall_tasks
 }
 
